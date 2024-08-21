@@ -1,37 +1,25 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SalesOverTime from './salesOverTime';
+import SalesGrowthRateOverTime from './salesGrowthRateoverTime';
+import NewCustomers from './newCustomers';
+import RepeatCustomers from './repeatedCustomers';
+import Home from './home';
 import './App.css';
 
-function App() {
-  const [sales, setSales] = useState([]);
-
-  const fetchSales = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/sales/total-over-time?interval=monthly');
-      console.log("Response:", response);
-      const data = await response.json();
-      setSales(data);
-    } catch (error) {
-      console.error("Error fetching sales data:", error);
-    }
-  };
-
-  // Use useEffect to fetch data when the component mounts
-  useEffect(() => {
-    fetchSales();
-  }, []); // Empty dependency array ensures it runs only once
-
+const App = () => {
   return (
-    <>
-      <h1>Sales Over Time</h1>
-      <ul>
-        {sales.map((sale, index) => (
-          <li key={index}>
-            {sale._id.year}-{sale._id.month}: {sale.totalSales}
-          </li>
-        ))}
-      </ul>
-    </>
+    <div className="App">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/salesOverTime" element={<SalesOverTime />} />
+          <Route path="/salesGrowthRateOverTime" element={<SalesGrowthRateOverTime />} />
+          <Route path="/newCustomers" element={<NewCustomers />} />
+          <Route path="/repeatCustomers" element={<RepeatCustomers />} />
+        </Routes>
+      </Router>
+    </div>
   );
-}
+};
 
 export default App;

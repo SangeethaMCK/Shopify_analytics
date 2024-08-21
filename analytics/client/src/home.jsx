@@ -21,7 +21,9 @@ const Home = () => {
           Repeat Customers Over Time
         </li>
         <li>Geographical Distribution of Customers</li>
-        <li>Customer Lifetime Value by Cohorts</li>
+        <li onClick={() => navigate('/cohorts')} style={{ cursor: 'pointer' }}>
+          Customer Lifetime Value by Cohort
+        </li>
       </ul>
     </div>
   );

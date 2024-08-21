@@ -3,6 +3,7 @@ import SalesOverTime from './salesOverTime';
 import SalesGrowthRateOverTime from './salesGrowthRateoverTime';
 import NewCustomers from './newCustomers';
 import RepeatCustomers from './repeatedCustomers';
+import Cohorts from './cohorts';
 import Home from './home';
 import './App.css';
 
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/salesGrowthRateOverTime" element={<SalesGrowthRateOverTime />} />
           <Route path="/newCustomers" element={<NewCustomers />} />
           <Route path="/repeatCustomers" element={<RepeatCustomers />} />
+          <Route path="/cohorts" element={<Cohorts />} />
         </Routes>
       </Router>
     </div>

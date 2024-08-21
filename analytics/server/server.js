@@ -189,6 +189,66 @@ app.get('/api/customers/repeat-over-time', async (req, res) => {
   }
 });
 
+// Define the route for Customer Lifetime Value by Cohorts
+app.get('/api/customers/clv-by-cohort', async (req, res) => {
+  try {
+    const customerLifetimeValue = await shopifyCustomers.aggregate([
+      {
+        $lookup: {
+          from: 'shopifyOrders',
+          localField: 'address.customer_id',
+          foreignField: 'customer.id',
+          as: 'orders'
+        }
+      },
+      {
+        $addFields: {
+          firstPurchaseDate: {
+            $min: "$orders.created_at"
+          }
+        }
+      },
+      {
+        $addFields: {
+          lifetimeValue: {
+            $sum: {
+              $map: {
+                input: "$orders",
+                as: "order",
+                in: { $toDouble: "$$order.total_price_set.shop_money.amount" }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          firstPurchaseMonth: {
+            $dateToString: { format: "%Y-%m", date: "$firstPurchaseDate" }
+          },
+          lifetimeValue: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$firstPurchaseMonth",
+          averageLifetimeValue: { $avg: "$lifetimeValue" }
+        }
+      },
+      {
+        $sort: { "_id": 1 }
+      }
+    ]);
+
+    res.json(customerLifetimeValue);
+  } catch (error) {
+    console.error("Error in aggregation:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');

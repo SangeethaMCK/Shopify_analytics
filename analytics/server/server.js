@@ -22,9 +22,9 @@ const shopifyCustomers = mongoose.model('shopifyCustomers', new mongoose.Schema(
 app.get('/api/sales/total-over-time', async (req, res) => {
   console.log("Request received:", req.query);
 
-  const interval = req.query.interval || 'daily';
+  const interval = req.query.interval || 'monthly';
   let groupByFields = {};
-
+console.log("interval:", interval);
   // Determine the grouping fields based on the interval
   switch (interval) {
     case 'monthly':
@@ -192,25 +192,25 @@ app.get('/api/customers/repeat-over-time', async (req, res) => {
 // Define the route for Customer Lifetime Value by Cohorts
 app.get('/api/clv-by-cohorts', async (req, res) => {
   try {
-    const cohortCLV = await Customer.aggregate([
+    const cohortCLV = await shopifyCustomers.aggregate([
       {
         $lookup: {
-          from: 'orders',
-          localField: 'id',
+          from: 'shopifyOrders',
+          localField: 'default_address.customer_id',
           foreignField: 'customer.id',
           as: 'customerOrders'
         }
       },
       {
-        $unwind: '$customerOrders'
+        $unwind: '$customerOrders' 
       },
       {
         $group: {
           _id: {
-            cohortMonth: { $dateToString: { format: "%Y-%m", date: "$created_at" } },
+            cohortMonth: { $dateToString: { format: "%Y-%m", date: "$customerOrders.created_at" } },
             customerId: "$id"
           },
-          totalSpent: { $sum: "$customerOrders.total_price" }
+          totalSpent: { $sum: "$shopifyOrders.total_price" }
         }
       },
       {
@@ -223,19 +223,20 @@ app.get('/api/clv-by-cohorts', async (req, res) => {
         $sort: { "_id": 1 }
       }
     ]);
-
+console.log("cohortCLV:", cohortCLV);
+    // Map the result to the desired format
     const result = cohortCLV.map(item => ({
       month: item._id,
       clv: item.totalCLV
     }));
 
+    // Send the result as a JSON response
     res.json(result);
   } catch (error) {
+    // Handle errors and send an error response
     res.status(500).json({ error: error.message });
   }
 });
-
-
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');

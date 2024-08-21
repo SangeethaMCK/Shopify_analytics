@@ -4,10 +4,11 @@ import Highcharts from 'highcharts';
 
 const NewCustomers = () => {
     const [chartOptions, setChartOptions] = useState({});   
+    const interval = localStorage.getItem('interval') || 'monthly';
 
     const fetchNewCustomers = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/customers/new-over-time?interval=monthly');
+            const response = await fetch('http://localhost:3000/api/customers/new-over-time?interval='+interval);
             const data = await response.json();
             console.log(data);
 

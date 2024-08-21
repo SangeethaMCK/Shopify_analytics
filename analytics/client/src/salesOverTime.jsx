@@ -6,10 +6,11 @@ import Highcharts from 'highcharts';
 function SalesOverTime() {
   const [sales, setSales] = useState([]);
   const [chartOptions, setChartOptions] = useState({});
-
+  const interval = localStorage.getItem('interval') || 'monthly';
+  
   const fetchSales = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/sales/total-over-time?interval=monthly');
+      const response = await fetch('http://localhost:3000/api/sales/total-over-time?interval='+interval);
   
       const data = await response.json();
       setSales(data);
@@ -52,13 +53,13 @@ function SalesOverTime() {
   return (
     <>
       <h1>Sales Over Time</h1>
-      <ul>
+      {/* <ul>
         {sales.map((sale, index) => (
           <li key={index}>
             {sale._id.year}-{sale._id.month}: {sale.totalSales}
           </li>
         ))}
-      </ul>
+      </ul> */}
       <HighchartsReact
         highcharts={Highcharts}
         options={chartOptions}

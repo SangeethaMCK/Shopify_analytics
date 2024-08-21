@@ -5,6 +5,7 @@ import Highcharts from 'highcharts';
 function SalesGrowthRateOverTime() {
   const [salesGrowth, setSalesGrowth] = useState([]);
   const [chartOptions, setChartOptions] = useState({});
+  const interval = localStorage.getItem('interval') || 'monthly';
 
   const calculateGrowthRate = (data) => {
     const growthRates = [];
@@ -19,7 +20,7 @@ function SalesGrowthRateOverTime() {
 
   const fetchSalesGrowth = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/sales/total-over-time?interval=monthly');
+      const response = await fetch('http://localhost:3000/api/sales/total-over-time?interval='+interval);
       const data = await response.json();
       const growthRates = calculateGrowthRate(data);
 

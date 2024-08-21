@@ -1,45 +1,64 @@
 import { useState, useEffect } from 'react';
-import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 
-const CLVCohorts = () => {
-  const [chartOptions, setChartOptions] = useState({});   
+const CLVByCohorts = () => {
+  const [chartOptions, setChartOptions] = useState({});
 
-  const fetchCLVByCohort = async () => {
+  const fetchCLVData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/customers/clv-by-cohort');
+      const response = await fetch('http://localhost:3000/api/clv-by-cohorts');
       const data = await response.json();
-      
-      const categories = data.map(item => item._id);  // Months
-      const seriesData = data.map(item => item.averageLifetimeValue);  // Average CLV
+
+      const months = data.map(item => item.month);
+      const clvValues = data.map(item => item.clv);
 
       setChartOptions({
+        chart: {
+          type: 'line',
+        },
         title: {
-          text: 'Customer Lifetime Value by Cohort'
+          text: 'Customer Lifetime Value by Cohort',
         },
         xAxis: {
-          categories: categories,
+          categories: months,
           title: {
-            text: 'Month of First Purchase'
-          }
+            text: 'Month',
+          },
         },
         yAxis: {
           title: {
-            text: 'Average Lifetime Value'
-          }
+            text: 'Lifetime Value (Currency)',
+          },
+          labels: {
+            formatter: function () {
+              return this.value.toLocaleString();
+            },
+          },
         },
-        series: [{
-          name: 'Average CLV',
-          data: seriesData
-        }]
+        series: [
+          {
+            name: 'CLV',
+            data: clvValues,
+            color: '#00aaff',
+          },
+        ],
+        plotOptions: {
+          line: {
+            dataLabels: {
+              enabled: true,
+            },
+            enableMouseTracking: true,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error fetching CLV by cohort data:", error);
+      console.error("Error fetching CLV data:", error);
     }
   };
 
   useEffect(() => {
-    fetchCLVByCohort();
+    fetchCLVData();
   }, []);
 
   return (
@@ -53,4 +72,4 @@ const CLVCohorts = () => {
   );
 };
 
-export default CLVCohorts;
+export default CLVByCohorts;

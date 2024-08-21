@@ -190,50 +190,33 @@ app.get('/api/customers/repeat-over-time', async (req, res) => {
 });
 
 // Define the route for Customer Lifetime Value by Cohorts
-app.get('/api/customers/clv-by-cohort', async (req, res) => {
+app.get('/api/clv-by-cohorts', async (req, res) => {
   try {
-    const customerLifetimeValue = await shopifyCustomers.aggregate([
+    const cohortCLV = await Customer.aggregate([
       {
         $lookup: {
-          from: 'shopifyOrders',
-          localField: 'address.customer_id',
+          from: 'orders',
+          localField: 'id',
           foreignField: 'customer.id',
-          as: 'orders'
+          as: 'customerOrders'
         }
       },
       {
-        $addFields: {
-          firstPurchaseDate: {
-            $min: "$orders.created_at"
-          }
-        }
+        $unwind: '$customerOrders'
       },
       {
-        $addFields: {
-          lifetimeValue: {
-            $sum: {
-              $map: {
-                input: "$orders",
-                as: "order",
-                in: { $toDouble: "$$order.total_price_set.shop_money.amount" }
-              }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          firstPurchaseMonth: {
-            $dateToString: { format: "%Y-%m", date: "$firstPurchaseDate" }
+        $group: {
+          _id: {
+            cohortMonth: { $dateToString: { format: "%Y-%m", date: "$created_at" } },
+            customerId: "$id"
           },
-          lifetimeValue: 1
+          totalSpent: { $sum: "$customerOrders.total_price" }
         }
       },
       {
         $group: {
-          _id: "$firstPurchaseMonth",
-          averageLifetimeValue: { $avg: "$lifetimeValue" }
+          _id: "$_id.cohortMonth",
+          totalCLV: { $sum: "$totalSpent" }
         }
       },
       {
@@ -241,9 +224,13 @@ app.get('/api/customers/clv-by-cohort', async (req, res) => {
       }
     ]);
 
-    res.json(customerLifetimeValue);
+    const result = cohortCLV.map(item => ({
+      month: item._id,
+      clv: item.totalCLV
+    }));
+
+    res.json(result);
   } catch (error) {
-    console.error("Error in aggregation:", error);
     res.status(500).json({ error: error.message });
   }
 });

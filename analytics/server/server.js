@@ -24,7 +24,7 @@ app.get('/api/sales/total-over-time', async (req, res) => {
 
   const interval = req.query.interval || 'monthly';
   let groupByFields = {};
-console.log("interval:", interval);
+// console.log("interval:", interval);
   // Determine the grouping fields based on the interval
   switch (interval) {
     case 'monthly':
@@ -182,7 +182,7 @@ app.get('/api/customers/repeat-over-time', async (req, res) => {
           },
           { $sort: { "timePeriod.year": 1, "timePeriod.month": 1, "timePeriod.day": 1 } }
       ]);
-      console.log("Repeat customers:", repeatCustomers);
+      // console.log("Repeat customers:", repeatCustomers);
       res.json(repeatCustomers);
   } catch (error) {
       res.status(500).json({ error: error.message });

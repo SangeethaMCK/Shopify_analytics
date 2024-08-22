@@ -1,6 +1,6 @@
 
 ```
-analytics
+shopify
 ├─ README.md
 ├─ client
 │  ├─ README.md
